@@ -1,2 +1,644 @@
 # cubometro
 sistema de medição simples
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubímetro Fácil - App Completo</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📐</text></svg>">
+    <style>
+        :root {
+            --primary-green: #27ae60;
+            --dark-green: #219653;
+            --light-green: #d5f4e6;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --background: #f8fdf9;
+            --card-bg: #ffffff;
+            --shadow: 0 10px 30px rgba(39, 174, 96, 0.15);
+        }
+        
+        .dark-mode {
+            --primary-green: #2ecc71;
+            --dark-green: #27ae60;
+            --light-green: #1a3b2a;
+            --text-dark: #ecf0f1;
+            --text-light: #bdc3c7;
+            --background: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding: 0;
+        }
+        
+        .app-screen {
+            display: none;
+            min-height: 100vh;
+        }
+        
+        .app-screen.active {
+            display: block;
+        }
+        
+        .app-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--card-bg);
+            min-height: 100vh;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .app-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .app-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .app-content {
+            padding: 20px;
+            min-height: calc(100vh - 120px);
+        }
+        
+        /* Estilos das telas específicas */
+        .form-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--light-green);
+            border-radius: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: var(--card-bg);
+            color: var(--text-dark);
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-green);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--dark-green);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary-green);
+            border: 2px solid var(--primary-green);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--light-green);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Tela Inicial Específica */
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        .welcome-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .action-card {
+            background: var(--light-green);
+            padding: 25px 15px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-green);
+        }
+        
+        .action-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        /* Media Queries para Mobile */
+        @media (max-width: 768px) {
+            .app-content {
+                padding: 15px;
+            }
+            
+            .form-section {
+                padding: 15px;
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .app-header {
+                padding: 20px 15px;
+            }
+            
+            .app-title {
+                font-size: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            
+            .welcome-icon {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela Inicial -->
+    <div id="tela-inicial" class="app-screen active">
+        <div class="app-container">
+            <div class="app-header">
+                <div class="app-title">
+                    <span>📐</span>
+                    Cubímetro Fácil
+                </div>
+                <div class="app-subtitle">Sistema profissional de medição</div>
+            </div>
+            
+            <div class="app-content">
+                <div class="welcome-section">
+                    <div class="welcome-icon">📦</div>
+                    <h2>Bem-vindo ao Cubímetro Fácil</h2>
+                    <p style="color: var(--text-light); margin: 10px 0 20px 0;">
+                        Sua solução completa para cálculo de medidas cúbicas
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="userName">Seu nome:</label>
+                        <input type="text" id="userName" placeholder="Digite seu nome" autocomplete="off">
+                    </div>
+                    <button class="btn btn-primary" onclick="iniciarApp()">Começar a Usar</button>
+                </div>
+                
+                <div id="quick-actions" class="quick-actions" style="display: none;">
+                    <div class="action-card" onclick="mostrarTela('tela-medicao')">
+                        <div class="action-icon">📏</div>
+                        <div class="action-text">Nova Medição</div>
+                    </div>
+                    <div class="action-card" onclick="mostrarTela('tela-historico')">
+                        <div class="action-icon">📋</div>
+                        <div class="action-text">Ver Histórico</div>
+                    </div>
+                    <div class="action-card" onclick="mostrarTela('tela-configuracoes')">
+                        <div class="action-icon">⚙️</div>
+                        <div class="action-text">Configurações</div>
+                    </div>
+                    <div class="action-card" onclick="sobreApp()">
+                        <div class="action-icon">ℹ️</div>
+                        <div class="action-text">Sobre o App</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela de Nova Medição (Simplificada para demo) -->
+    <div id="tela-medicao" class="app-screen">
+        <div class="app-container">
+            <div class="app-header">
+                <button class="back-btn" onclick="mostrarTela('tela-inicial')">← Voltar</button>
+                <div class="app-title">Nova Medição</div>
+                <div class="app-subtitle">Preencha os dados da carga</div>
+            </div>
+            
+            <div class="app-content">
+                <div class="form-section">
+                    <h3>📦 Dados da Carga</h3>
+                    
+                    <div class="form-group">
+                        <label for="fornecedor">Fornecedor:</label>
+                        <input type="text" id="fornecedor" placeholder="Nome do fornecedor">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="materialType">Tipo de Material:</label>
+                        <select id="materialType">
+                            <option value="lenha">Lenha</option>
+                            <option value="tora">Tora</option>
+                            <option value="madeiraSerrada">Madeira Serrada</option>
+                            <option value="aparasPapel">Aparas de Papel</option>
+                            <option value="pellets">Pellets</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="volume">Volume (m³):</label>
+                        <input type="number" id="volume" step="0.01" placeholder="Ex: 53.75">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="salvarMedicaoDemo()">Salvar Medição</button>
+                </div>
+                
+                <div id="resultado-medicao" class="form-section hidden">
+                    <h3>✅ Medição Salva!</h3>
+                    <p id="detalhes-medicao"></p>
+                    <button class="btn btn-secondary" onclick="mostrarTela('tela-historico')">Ver no Histórico</button>
+                    <button class="btn btn-primary" onclick="novaMedicao()">Nova Medição</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela de Histórico (Simplificada para demo) -->
+    <div id="tela-historico" class="app-screen">
+        <div class="app-container">
+            <div class="app-header">
+                <button class="back-btn" onclick="mostrarTela('tela-inicial')">← Voltar</button>
+                <div class="app-title">Histórico</div>
+                <div class="app-subtitle">Suas medições realizadas</div>
+            </div>
+            
+            <div class="app-content">
+                <div class="form-section">
+                    <h3>📋 Últimas Medições</h3>
+                    <div id="lista-historico">
+                        <!-- As medições serão carregadas aqui -->
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="mostrarTela('tela-medicao')">Nova Medição</button>
+                    <button class="btn btn-secondary" onclick="limparHistorico()">Limpar Histórico</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela de Configurações (Simplificada para demo) -->
+    <div id="tela-configuracoes" class="app-screen">
+        <div class="app-container">
+            <div class="app-header">
+                <button class="back-btn" onclick="mostrarTela('tela-inicial')">← Voltar</button>
+                <div class="app-title">Configurações</div>
+                <div class="app-subtitle">Personalize o aplicativo</div>
+            </div>
+            
+            <div class="app-content">
+                <div class="form-section">
+                    <h3>🎨 Aparência</h3>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="modo-escuro" onchange="alternarModoEscuro()">
+                            Modo Escuro
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>📊 Estatísticas</h3>
+                    <p>Total de medições: <strong id="total-medicoes">0</strong></p>
+                    <p>Volume total: <strong id="volume-total">0 m³</strong></p>
+                </div>
+                
+                <div class="form-section">
+                    <h3>🛠️ Sistema</h3>
+                    <button class="btn btn-secondary" onclick="exportarDados()">Exportar Dados</button>
+                    <button class="btn btn-danger" onclick="resetarApp()">Resetar App</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // SISTEMA PRINCIPAL DO APP
+        // =============================================
+        
+        // Configurações globais
+        let config = {
+            usuario: '',
+            modoEscuro: false,
+            medicoes: []
+        };
+
+        // Inicializar app
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarConfiguracoes();
+            atualizarEstatisticas();
+            carregarHistorico();
+        });
+
+        // Sistema de navegação
+        function mostrarTela(telaId) {
+            // Esconder todas as telas
+            document.querySelectorAll('.app-screen').forEach(tela => {
+                tela.classList.remove('active');
+            });
+            
+            // Mostrar tela selecionada
+            document.getElementById(telaId).classList.add('active');
+            
+            // Atualizar dados específicos da tela
+            if (telaId === 'tela-historico') {
+                carregarHistorico();
+            } else if (telaId === 'tela-configuracoes') {
+                atualizarEstatisticas();
+            }
+        }
+
+        // Sistema de usuário
+        function iniciarApp() {
+            const userName = document.getElementById('userName').value.trim();
+            if (userName) {
+                config.usuario = userName;
+                salvarConfiguracoes();
+                document.getElementById('quick-actions').style.display = 'grid';
+                document.querySelector('.welcome-section').style.display = 'none';
+            } else {
+                alert('Por favor, digite seu nome para continuar.');
+            }
+        }
+
+        // Sistema de medições
+        function salvarMedicaoDemo() {
+            const fornecedor = document.getElementById('fornecedor').value;
+            const material = document.getElementById('materialType').value;
+            const volume = parseFloat(document.getElementById('volume').value);
+
+            if (!fornecedor || !volume) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            const novaMedicao = {
+                id: Date.now(),
+                data: new Date().toLocaleDateString('pt-BR'),
+                hora: new Date().toLocaleTimeString('pt-BR'),
+                fornecedor: fornecedor,
+                material: material,
+                volume: volume,
+                usuario: config.usuario || 'Demo'
+            };
+
+            config.medicoes.unshift(novaMedicao);
+            salvarConfiguracoes();
+
+            // Mostrar confirmação
+            document.getElementById('detalhes-medicao').innerHTML = `
+                <strong>Fornecedor:</strong> ${fornecedor}<br>
+                <strong>Material:</strong> ${material}<br>
+                <strong>Volume:</strong> ${volume} m³<br>
+                <strong>Data:</strong> ${novaMedicao.data} ${novaMedicao.hora}
+            `;
+            document.getElementById('resultado-medicao').classList.remove('hidden');
+        }
+
+        function novaMedicao() {
+            document.getElementById('fornecedor').value = '';
+            document.getElementById('volume').value = '';
+            document.getElementById('resultado-medicao').classList.add('hidden');
+        }
+
+        // Sistema de histórico
+        function carregarHistorico() {
+            const lista = document.getElementById('lista-historico');
+            
+            if (config.medicoes.length === 0) {
+                lista.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;">Nenhuma medição encontrada</p>';
+                return;
+            }
+
+            lista.innerHTML = config.medicoes.map(medicao => `
+                <div style="background: var(--card-bg); padding: 15px; margin: 10px 0; border-radius: 10px; border-left: 4px solid var(--primary-green);">
+                    <div style="display: flex; justify-content: between; align-items: start;">
+                        <div>
+                            <strong>${medicao.fornecedor}</strong><br>
+                            <small>${medicao.material} • ${medicao.volume} m³</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <small style="color: var(--text-light);">${medicao.data}</small><br>
+                            <small style="color: var(--text-light);">${medicao.hora}</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function limparHistorico() {
+            if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
+                config.medicoes = [];
+                salvarConfiguracoes();
+                carregarHistorico();
+            }
+        }
+
+        // Sistema de configurações
+        function alternarModoEscuro() {
+            const checkbox = document.getElementById('modo-escuro');
+            config.modoEscuro = checkbox.checked;
+            document.body.classList.toggle('dark-mode', config.modoEscuro);
+            salvarConfiguracoes();
+        }
+
+        function atualizarEstatisticas() {
+            const total = config.medicoes.length;
+            const volumeTotal = config.medicoes.reduce((sum, m) => sum + m.volume, 0);
+            
+            document.getElementById('total-medicoes').textContent = total;
+            document.getElementById('volume-total').textContent = volumeTotal.toFixed(2) + ' m³';
+        }
+
+        function exportarDados() {
+            const dados = {
+                configuracoes: config,
+                exportadoEm: new Date().toISOString()
+            };
+            
+            const dados = {
+                configuracoes: config,
+                exportadoEm: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(dados, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cubimetro-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            
+            alert('Dados exportados com sucesso!');
+        }
+
+        function resetarApp() {
+            if (confirm('ATENÇÃO: Isso irá apagar TODOS os dados. Continuar?')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        function sobreApp() {
+            alert('Cubímetro Fácil v1.0\n\nSistema profissional para cálculo de medidas cúbicas\n\nDesenvolvido para demonstração');
+        }
+
+        // Sistema de armazenamento
+        function carregarConfiguracoes() {
+            const salvo = localStorage.getItem('cubimetroConfig');
+            if (salvo) {
+                config = JSON.parse(salvo);
+                
+                // Aplicar configurações
+                if (config.usuario) {
+                    document.getElementById('userName').value = config.usuario;
+                    document.getElementById('quick-actions').style.display = 'grid';
+                    document.querySelector('.welcome-section').style.display = 'none';
+                }
+                
+                if (config.modoEscuro) {
+                    document.body.classList.add('dark-mode');
+                    document.getElementById('modo-escuro').checked = true;
+                }
+            }
+        }
+
+        function salvarConfiguracoes() {
+            localStorage.setItem('cubimetroConfig', JSON.stringify(config));
+        }
+
+        // Demo automática para apresentação
+        function carregarDemoAutomatica() {
+            if (config.medicoes.length === 0) {
+                // Adicionar algumas medições de exemplo
+                const exemplos = [
+                    { fornecedor: 'Madeireira ABC', material: 'lenha', volume: 53.75 },
+                    { fornecedor: 'Florestal XYZ', material: 'tora', volume: 38.20 },
+                    { fornecedor: 'Serraria Central', material: 'madeiraSerrada', volume: 45.80 }
+                ];
+                
+                exemplos.forEach((ex, index) => {
+                    setTimeout(() => {
+                        const novaMedicao = {
+                            id: Date.now() + index,
+                            data: new Date(2024, 2, 15 - index).toLocaleDateString('pt-BR'),
+                            hora: '08:00',
+                            ...ex,
+                            usuario: 'Demo'
+                        };
+                        config.medicoes.push(novaMedicao);
+                    }, index * 100);
+                });
+                
+                setTimeout(() => {
+                    salvarConfiguracoes();
+                    if (document.getElementById('tela-historico').classList.contains('active')) {
+                        carregarHistorico();
+                    }
+                }, 500);
+            }
+        }
+
+        // Carregar demo quando o app iniciar
+        setTimeout(carregarDemoAutomatica, 1000);
+    </script>
+</body>
+</html>
+```
+
+
